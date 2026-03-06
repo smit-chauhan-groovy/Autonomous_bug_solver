@@ -78,12 +78,13 @@ query GetIssue($id: String!) {
 ### Fallback Query (if no ID provided)
 
 ```graphql
-query GetUnassignedBugs {
+query GetMyBugs {
   issues(
     filter: {
-      labels: { name: { eq: "Bug" } }
-      assignee: { null: true }
-      priority: { lte: 2 }
+      team: { key: { eq: "GRO" } }
+      assignee: { isMe: { eq: true } }
+      state: { name: { eq: "Todo" } }
+      labels: { name: { eq: "bug" } }
     }
     orderBy: priority
     first: 1
