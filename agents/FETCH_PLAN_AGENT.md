@@ -6,13 +6,13 @@
 
 > ⚡ **Before making any Linear API call, you MUST read the `.env` file from the project root directory and extract the values below. Do this automatically — do not ask the user for these values.**
 
-| Variable         | Source                    | Format           | Usage                                        |
-| ---------------- | ------------------------- | ---------------- | -------------------------------------------- |
-| `LINEAR_API_KEY` | `.env` → `LINEAR_API_KEY` | String           | Pass as `Authorization: <value>` header in all Linear GraphQL requests |
-| `LINEAR_TEAM_ID` | `.env` → `LINEAR_TEAM_ID` | String           | Use in team filter: `team: { key: { eq: "<value>" } }` |
-| `LINEAR_ASSIGNEE`| `.env` → `LINEAR_ASSIGNEE`| String           | Use in assignee filter. Value `isMe` → `assignee: { isMe: { eq: true } }`, otherwise use as name/email |
-| `LINEAR_STATES`  | `.env` → `LINEAR_STATES`  | Comma-separated  | States to filter (e.g. `Todo,In Progress`). Build OR filter across all values |
-| `LINEAR_LABELS`  | `.env` → `LINEAR_LABELS`  | Comma-separated  | Labels to filter (e.g. `bug,critical`). Build OR filter across all values |
+| Variable          | Source                     | Format          | Usage                                                                                                  |
+| ----------------- | -------------------------- | --------------- | ------------------------------------------------------------------------------------------------------ |
+| `LINEAR_API_KEY`  | `.env` → `LINEAR_API_KEY`  | String          | Pass as `Authorization: <value>` header in all Linear GraphQL requests                                 |
+| `LINEAR_TEAM_ID`  | `.env` → `LINEAR_TEAM_ID`  | String          | Use in team filter: `team: { key: { eq: "<value>" } }`                                                 |
+| `LINEAR_ASSIGNEE` | `.env` → `LINEAR_ASSIGNEE` | String          | Use in assignee filter. Value `isMe` → `assignee: { isMe: { eq: true } }`, otherwise use as name/email |
+| `LINEAR_STATES`   | `.env` → `LINEAR_STATES`   | Comma-separated | States to filter (e.g. `Todo,In Progress`). Build OR filter across all values                          |
+| `LINEAR_LABELS`   | `.env` → `LINEAR_LABELS`   | Comma-separated | Labels to filter (e.g. `bug,critical`). Build OR filter across all values                              |
 
 ### How to Load
 
@@ -22,7 +22,9 @@
 4. Use `LINEAR_TEAM_ID` in GraphQL query filters
 5. For **comma-separated values** (`LINEAR_STATES`, `LINEAR_LABELS`): split by `,` and build a filter that matches **any** of the values
 6. For `LINEAR_ASSIGNEE`: if value is `isMe`, use `assignee: { isMe: { eq: true } }`; otherwise filter by name
-7. **If `.env` is missing or keys are absent → abort with error message, do not prompt the user**
+7. **If `.env` is missing → Error: `ERR_ENV_MISSING`**
+8. **If keys are absent → Error: `ERR_ENV_KEY_MISSING (<key_name>)`**
+9. **Aborting on environment errors is MANDATORY. Do not guess values.**
 
 ---
 
@@ -103,6 +105,7 @@ query GetIssue($id: String!) {
 ### Fallback Query (if no ID provided)
 
 > ⚡ Replace all `$ENV_*` placeholders below with actual values read from `.env` before executing.
+>
 > - `$LINEAR_TEAM_ID` → team key filter
 > - `$LINEAR_ASSIGNEE` → if `isMe`, use `isMe: { eq: true }`; otherwise use `name: { eq: "<value>" }`
 > - `$LINEAR_STATES` → split by comma, apply OR filter for each state name
@@ -110,7 +113,7 @@ query GetIssue($id: String!) {
 
 ```graphql
 # Example with LINEAR_STATES=Todo,In Progress and LINEAR_LABELS=bug
-query GetMyBugs {
+query GetMyBugs($after: String) {
   issues(
     filter: {
       team: { key: { eq: "$LINEAR_TEAM_ID" } }
@@ -119,8 +122,13 @@ query GetMyBugs {
       labels: { name: { in: ["$LINEAR_LABELS"] } }
     }
     orderBy: priority
-    first: 1
+    first: 50
+    after: $after
   ) {
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
     nodes {
       id
       title
@@ -134,11 +142,19 @@ query GetMyBugs {
 }
 ```
 
+> ⚡ **Pagination Logic**: If `nodes` is empty or the target bug is not found in the first 50, use `hasNextPage` and `endCursor` to fetch the next page.
+
 ---
 
-## Step 2 — Analyze the Bug
+## Step 2 — Pre-Analysis & Context Gathering
 
-Once fetched, perform a deep analysis:
+Before analyzing the bug, scan the project root:
+
+- [ ] Read `README.md` and `CONTRIBUTING.md` for coding standards.
+- [ ] Identify project type (Node, Python, Go) via manifest files (`package.json`, `requirements.txt`).
+- [ ] Check for existing CI configurations (`.github/workflows`, `jenkinsfile`).
+
+## Step 3 — Analyze the Bug
 
 ### Analysis Checklist
 

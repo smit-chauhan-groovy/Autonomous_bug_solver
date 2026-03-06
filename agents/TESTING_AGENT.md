@@ -55,6 +55,7 @@ For each item in `test_plan`, write a real, executable test:
 
 ### Test Writing Rules
 
+- [ ] **Detect Structure**: Check for `tests/`, `__tests__/`, or co-located `.test.ts` files.
 - [ ] Use the project's existing test framework (Jest / Vitest / Pytest / etc.)
 - [ ] Each test must be **independent** (no shared state between tests)
 - [ ] Use **descriptive test names** — `it('should return null when user is unauthenticated')`
@@ -67,25 +68,25 @@ For each item in `test_plan`, write a real, executable test:
 ```typescript
 // src/path/to/file.test.ts
 
-import { describe, it, expect, vi } from 'vitest';
-import { functionUnderTest } from './file';
+import { describe, it, expect, vi } from "vitest";
+import { functionUnderTest } from "./file";
 
-describe('functionUnderTest — Bug LINEAR-123', () => {
+describe("functionUnderTest — Bug LINEAR-123", () => {
   // T001: Unit test — resolves reported behavior
-  it('should handle null user gracefully', () => {
+  it("should handle null user gracefully", () => {
     const result = functionUnderTest(null);
     expect(result).toBe(null);
   });
 
   // T002: Regression — existing behavior preserved
-  it('should return user profile when user is valid', () => {
-    const mockUser = { id: '1', profile: { name: 'Alice' } };
+  it("should return user profile when user is valid", () => {
+    const mockUser = { id: "1", profile: { name: "Alice" } };
     const result = functionUnderTest(mockUser);
-    expect(result).toEqual({ name: 'Alice' });
+    expect(result).toEqual({ name: "Alice" });
   });
 
   // T003: Edge case — empty object
-  it('should handle user with no profile field', () => {
+  it("should handle user with no profile field", () => {
     const result = functionUnderTest({});
     expect(result).toBe(null);
   });
@@ -117,6 +118,7 @@ Capture:
 - Passed count
 - Failed count
 - Each failure's error message + stack trace
+- **Coverage**: If available, capture line coverage for the target file.
 
 ---
 
@@ -187,3 +189,4 @@ If tests fail and the Orchestrator sends the Fixer Agent a patch:
 - ❌ Do not mock the code under test itself
 - ❌ Do not write tests that always pass regardless of code
 - ❌ Do not leave `test.only` or `test.skip` in final output
+- ❌ **Cleanup**: Do not leave temporary test artifacts if `TESTS_PASSED`. Delete them before signaling the Orchestrator.

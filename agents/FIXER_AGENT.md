@@ -72,6 +72,8 @@ Execute each step in the fix plan sequentially:
 3. **Apply** the minimal change that resolves the issue
 4. **Avoid** changing unrelated code
 5. **Preserve** existing code style, naming conventions, and formatting
+6. **LINT**: After applying the fix, run `npm run lint --fix` or equivalent.
+7. **TYPE CHECK**: Run `npx tsc --noEmit` to ensure no new type errors were introduced.
 
 ### Retry Run
 
@@ -91,7 +93,8 @@ When called with `retry_context`:
 | ---------------- | ---------------------------------------------------- |
 | Minimal diff     | Change only what is necessary                        |
 | No style changes | Don't reformat unrelated code                        |
-| Type safety      | Maintain or improve type annotations                 |
+| Type safety      | Maintain or improve type annotations (Run `tsc`)     |
+| Lint Clean       | Changes must pass project linting (Run `lint --fix`) |
 | No magic values  | Use constants or config values                       |
 | Comments         | Add a brief inline comment if the fix is non-obvious |
 | No TODOs         | Do not leave unresolved TODOs in the fix             |

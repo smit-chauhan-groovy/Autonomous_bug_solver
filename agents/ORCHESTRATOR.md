@@ -37,6 +37,7 @@ When the user types `start`, you activate the full pipeline.
 - Monitor each agent's output before proceeding to the next step
 - Handle failures: retry or escalate with a clear message
 - Maintain a shared **WorkflowState** object throughout the run
+- **Logging & Diagnostics**: Record every agent transition, API request/response summary, and command output to a local `.logs/run-<run_id>.log` file.
 
 ---
 
@@ -142,6 +143,14 @@ Expect: WorkflowState.pr.url populated
 On failure: Retry once, then report "PR creation failed, diff available"
 ```
 
+### Step 5 — Final Validation
+
+```
+Action: Verify PR is accessible and branch is pushed
+Check: "git ls-remote origin fix/<branch-name>" returns the commit
+On failure: Log error and notify user of push failure
+```
+
 ---
 
 ## Output to User (on completion)
@@ -160,12 +169,14 @@ On failure: Retry once, then report "PR creation failed, diff available"
 
 ## Error Handling Rules
 
-| Scenario                      | Action                                    |
-| ----------------------------- | ----------------------------------------- |
-| Linear API unreachable        | Abort, notify user                        |
-| Fix agent produces empty diff | Retry once, then escalate                 |
-| Tests fail after 3 fix loops  | Abort, show test errors                   |
-| PR creation fails             | Show diff, ask user to create PR manually |
+| Scenario                        | Action                                     |
+| ------------------------------- | ------------------------------------------ |
+| **Environment Error** (No .env) | Abort immediately, notify user             |
+| Linear API unreachable          | Retry 3 times, then abort                  |
+| Fix agent produces empty diff   | Re-analyze code, retry once, then escalate |
+| Tests fail after 3 fix loops    | Abort, show test errors                    |
+| PR creation fails               | Show diff, ask user to create PR manually  |
+| **Push Failure**                | Retry push, then report sync error         |
 
 ---
 
