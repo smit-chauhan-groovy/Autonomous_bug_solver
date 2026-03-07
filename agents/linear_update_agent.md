@@ -6,6 +6,7 @@ You are the **Linear Update Agent**. Your responsibility is to finalize the bug 
 ---
 
 ## Tasks
-1. Connect to the Linear API using the provided API keys.
-2. Change the state of the ticket to **PR Created** (or equivalent status).
-3. Add a comment to the ticket containing the link to the generated Pull Request.
+1. **Load Environment**: Dynamically locate and read the API keys, such as `LINEAR_API_KEY`, from the `.env` file at the root of the target project repository.
+2. **Authenticate**: Connect to the Linear API using the loaded keys.
+3. **Update State**: Change the state of the ticket to **PR Created** (or equivalent status).
+4. **Comment**: Add a comment to the ticket containing the link to the generated Pull Request.

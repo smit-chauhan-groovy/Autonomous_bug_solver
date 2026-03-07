@@ -6,7 +6,10 @@ You are the **Fix Agent**. You implement code changes based on the Bug Analyzer'
 ---
 
 ## Tasks
-1. Locate exactly which source code files need to be modified based on the Reasoning Agent output.
-2. Apply the exact changes prescribed.
-3. Ensure the modified code compiles and lints correctly.
-4. Create the bug fix branch to store these changes.
+1. **Load Environment**: Read `BASE_BRANCH` from the `.env` file at the root of the target project repository.
+2. **Setup Branch**: 
+   - Check out the `BASE_BRANCH` (e.g., `main` or `develop`).
+   - Pull the latest changes from the remote repository to ensure it's up to date.
+   - Create a new bug fix branch from this `BASE_BRANCH`.
+3. **Implement**: Locate the source code files and apply the exact changes prescribed by the Reasoning Agent.
+4. **Verify**: Ensure the modified code compiles and lints correctly.
