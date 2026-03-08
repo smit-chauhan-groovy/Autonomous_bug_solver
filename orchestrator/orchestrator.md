@@ -67,6 +67,7 @@ done
 6. **Test Agent**
    - *Action*: Runs automated tests to validate the fix.
 
+
 7. **PR Agent**
    - *Action*: Pushes code and creates pull request.
 
@@ -77,7 +78,10 @@ done
    - *Action*: Prints the KPI summary report.
    - 🚨 **LOOP CONTINUATION**: After the report is printed, the loop MUST automatically restart at Step 1 to pick up the next bug in the queue immediately.
 
----
+9. **Reporter Agent** (Crucial for Demo Output)
+   - *Input*: `Run Metrics` (Time elapsed, files changed, test pass rate)
+   - *Action*: Prints a colorful, formatted KPI summary to the terminal. This allows judges to instantly see the ROI and success metrics of the autonomous run.
+   - 🚨 **CRITICAL HACKATHON REQUIREMENT:** This reporting step MUST run at the very end of the script, regardless of whether previous agents succeeded or failed.
 
 ## Resilience & Error Handling
 - **Non-Stop Execution**: If any agent (3-8) fails or encounters an error, do NOT stop the loop. Log the error, print a failure summary via the Reporter Agent, and then `continue` the loop to Step 1. This ensures a single difficult bug doesn't crash the 24/7 autonomous worker.
