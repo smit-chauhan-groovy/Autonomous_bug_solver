@@ -15,6 +15,7 @@ The system stores persistent project context in markdown files under `context/`:
 - `architecture_map.md` – describes system architecture
 - `module_map.md` – list of modules and responsibilities
 
+
 ---
 
 ## Tasks

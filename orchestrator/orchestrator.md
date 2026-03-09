@@ -8,8 +8,6 @@ You are the **Orchestrator**, the central controller of the autonomous AI bug fi
 ## Workspace Awareness (Global Context)
 To prevent path-related bugs, you **must** determine and pass the following absolute workspace paths to all agents during execution:
 - `repo_root`: The absolute path to the root of the project repository.
-- `backend_dir`: `$repo_root/backend` (or equivalent backend path).
-- `frontend_dir`: `$repo_root/frontend` (or equivalent frontend path).
 These paths ensure agents like the Test Agent and Fix Agent execute commands in the correct directories.
 
 ---
@@ -25,8 +23,14 @@ To maintain a clean repository and ensure all information is captured in the con
 You must execute the following agents in a **non-stop loop**. If a bug is found, fix it and immediately restart the loop. If no bugs are found, wait and poll.
 
 ```bash
-while true; do
-  echo "🚀 [PIPELINE] Checking for new bugs..."
+  echo "🚀 [PIPELINE] Initializing project context..."
+  
+  # 0. Context Initialization Agent
+  # Action: Performs a one-time analysis of the codebase to populate architecture_map.md, module_map.md, and project_summary.md.
+  # This agent runs once before the main autonomous loop starts.
+
+  while true; do
+    echo "🚀 [PIPELINE] Checking for new bugs..."
   
   # 1. Fetch Agent
   # If output contains "NO_BUGS_FOUND", wait 3 minutes and continue
@@ -39,6 +43,9 @@ done
 ```
 
 ### Detailed Agent Sequence:
+
+0. **Context Initializer Agent**
+   - *Action*: Performs a one-time analysis of the entire codebase and populates `architecture_map.md`, `module_map.md`, and `project_summary.md` in the `context/` directory. if already not empty then continue with next step.
 
 1. **Linear Fetch Agent**
    - *Action*: Fetches the next assigned open bug.
