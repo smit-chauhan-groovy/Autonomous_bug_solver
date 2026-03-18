@@ -42,7 +42,8 @@ done
 ### Detailed Agent Sequence:
 
 0. **Context Agent (Initialization Phase)**
-   - *Action*: Performs a one-time analysis of the entire codebase and populates `architecture_map.md`, `module_map.md`, and `project_summary.md` in the `context/` directory. If files already exist and are not empty, it continues to the next step.
+   - *Action*: Performs a one-time analysis of the entire codebase and populates `architecture_map.md`, `module_map.md`, `project_summary.md`, and verifies `coding_standards.md` exists in the `context/` directory. If files already exist and are not empty, it continues to the next step.
+   - *Coding Standards Injection*: Pass the `coding_standards.md` location to all downstream agents (Fix Agent, Reasoning Agent) as a required reference parameter.
 
 1. **Linear Fetch Agent**
    - *Action*: Fetches the next assigned open bug.
@@ -65,13 +66,24 @@ done
 
 3. **Reasoning Agent**
    - *Action*: Analyzes the bug and generates a strategy.
+   - *Input*: Bug details + `coding_standards.md` path
+   - *Output*: Must include coding standards compliance requirements in FIX_PLAN
    
 4. **File Locator Agent**
    - *Action*: Finds relevant files to modify.
    
 5. **Fix Agent**
    - *Action*: Implements code changes and creates branch.
-   
+   - *Input*: Fix strategy + `coding_standards.md` path + target file paths
+   - *Requirement*: MUST reference `coding_standards.md` before implementing any changes
+
+5.5 **Code Standards Validator Agent**
+   - *Action*: Validates that code changes comply with `coding_standards.md`
+   - *Input*: Changed files + `coding_standards.md` path
+   - *Output*: ✅ PASS or ❌ FAIL with specific violations
+   - *Auto-Fix*: Applies linting tools (ESLint, Prettier, Black, gofmt) if available
+   - *Gatekeeper*: If validation fails, loop back to Fix Agent; if passes, proceed to Test Agent
+
 6. **Test Agent**
    - *Action*: Runs automated tests to validate the fix.
 
